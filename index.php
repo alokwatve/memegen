@@ -17,6 +17,18 @@
 </head>
 <body>
 <center><h1> Memegen </h1><br></center>
+
+<script>
+    var link = document.querySelector('link[rel="import"]');
+    var content = link.import;
+
+    // Grab DOM from warning.html's document.
+    var el = content.querySelector('.warning');
+
+    document.body.appendChild(el.cloneNode(true));
+  </script>
+
+
 <?php
 include 'util.php';
 //echo renderImage('templates/clinton_zero.jpg');
