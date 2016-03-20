@@ -1,17 +1,18 @@
 use memegendb;
-create table MemeInfo if not exists (
-   id bigint auto_increment primary key ,
-   filename varchar(256) unique,
-   upvotes bigint,
-   downvotes bigint,
-   createdby varchar(256),
-   createdon datetime
+create table if not exists MemeInfo (
+    meme_id bigint auto_increment,
+    filename varchar(256) unique,
+    upvotes bigint,
+    downvotes bigint,
+    createdby varchar(256),
+    createdon datetime,
+    primary key (meme_id)
 );
 
-create table MemeTags if not exists (
-   tagid bigint auto_increment primary key,
-   memeid bigint,
-       index (memeid),
-       foreign key (memeid) refenreces MemeInfo(id),
-   tag varchar(64)
+create table if not exists MemeTags (
+    tag_id bigint auto_increment primary key,
+    meme_id bigint,
+    tag varchar(64),
+    index using hash (meme_id),
+    foreign key (meme_id) references MemeInfo(meme_id) on delete cascade on update cascade
 ); 
