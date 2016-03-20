@@ -5,9 +5,31 @@
 </head>
 <body>
 <script>
-    var getImport = document.getElementById('header');
-    var content = document.querySelector('link[id="header"]').import;    
-    document.body.appendChild(content.querySelector('.header').cloneNode(true));
+  var getImport = document.getElementById('header');
+  var content = document.querySelector('link[id="header"]').import;    
+  document.body.appendChild(content.querySelector('.header').cloneNode(true));
+</script>
+<script>
+  function submitForm(choice) {
+    var form = document.getElementById('thumbChoiceForm');
+    if (form == null) {
+      form = document.createElement('form');
+      form.id = 'thumbChoiceForm';
+    }
+    document.body.appendChild(form);
+    form.method = 'POST';
+    form.action = 'create.php';
+    var inputChoice = document.getElementById('thumbChoiceInput');
+    if (inputChoice == null) {
+      inputChoice = document.createElement('input');
+      inputChoice.id = 'thumbChoiceInput';
+      form.appendChild(inputChoice);
+    }
+    inputChoice.name = 'thumbChoice';
+    inputChoice.type = 'hidden';
+    inputChoice.value = choice;
+    form.submit();
+  }
 </script>
 <?php
 include 'util.php';
@@ -59,8 +81,22 @@ function createMeme($templateFileName, $text) {
 }
 
 /**
- * Displays all the available meme thumbnails.
+ * Returns thumbnail file name for given template file name.
  */
+function getThumbnailNameFromFileName($fileName) {
+  $count = 1;
+  return str_replace('templates/', 'thumb/thumb_', $fileName, $count);
+}
+
+/**
+ * Returns template file name for the given thumbnail
+ * file name.
+ */
+function getFileNameFromThumbnailName($thumb) {
+  $count = 1;
+  return str_replace('thumb/thumb_', 'templates/', $fileName, $count);
+}
+
 /**
  * Creates thumbnails for all the available meme templates.
  */
@@ -74,23 +110,26 @@ function createTemplateThumbnails() {
     }
     $image = new Imagick($fileName);
     $image->scaleImage(100, 100, true /* best fit */);
-    $count = 1;
-    $outputFileName = str_replace('templates/', 'thumb/thumb_', $fileName, $count);
+    $outputFileName = getThumbnailNameFromFileName($fileName);
     $image->writeImage($outputFileName);
   }
 }
 
+/**
+ * Displays all the available meme thumbnails.
+ */
 function displayThumbnails() {
   $fileList = glob('thumb/thumb_*.jpg');
   $imageTable = '<div class="thumbnails"><table width="100%">';
   $i = 0;
-  foreach ($fileList as $fileName) {
-    if (filesize($fileName) < 20 * 1024) {
+  foreach ($fileList as $thumbnailName) {
+    if (filesize($thumbnailName) < 20 * 1024) {
       // Ignore any file greater than 20KB.
       if ($i == 0) {
         $imageTable .= '<tr>';
       }
-      $imageTable .= '<td align="center">' . renderImage($fileName) . '</td>';
+      $imageTable .= '<td align="center">' . 
+        '<img src="' . $thumbnailName . '" onClick="submitForm(\'' . $thumbnailName  . '\')"></td> ';// . $thumbnailName ')" > </td>';
       if ($i == 3) {
         $imageTable .= '</tr>';
       }
@@ -104,12 +143,17 @@ function displayThumbnails() {
   echo $imageTable;
 }
 
-if ($choice == '__UNDEF__') {
+if (isset($_POST['thumbChoice'])) {
+  echo '<h1>FOUND</h1>';
+  echo '<h1>' . $_POST['thumbChoice'] . '</h1>';
+} else {
+  echo '<h1>NOT SET</h1>';
   createTemplateThumbnails();
   displayThumbnails();
-} else {
-  generateMemeForm();
 }
 ?>
+
+<!-- HTML form responsible for setting parameters -->
+
 </body>
 </html>
