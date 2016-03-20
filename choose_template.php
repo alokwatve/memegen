@@ -80,6 +80,13 @@ function createTemplateThumbnails() {
   }
 }
 
+$choice = $choice || '__UNDEF__';
+
+if ($choice == '__UNDEF__') {
+  createTemplateThumbnails();
+  displayThumbnails();
+}
+
 function displayThumbnails() {
   $fileList = glob('thumb/thumb_*.jpg');
   $imageTable = '<div class="thumbnails"><table width="100%">';
@@ -104,12 +111,6 @@ function displayThumbnails() {
   echo $imageTable;
 }
 
-if ($choice == '__UNDEF__') {
-  createTemplateThumbnails();
-  displayThumbnails();
-} else {
-  generateMemeForm();
-}
 ?>
 </body>
 </html>

@@ -15,7 +15,7 @@
 </script>
 <?php
 include 'util.php';
-//echo renderImage('templates/clinton_zero.jpg');
+echo renderImage('templates/clinton_zero.jpg');
 ?>
 </body>
 </html>
