@@ -2,6 +2,48 @@
 function renderImage($filename) {
   $contents = file_get_contents($filename);
   $base64   = base64_encode($contents); 
-  return ('<img src="data:image/jpeg;base64,' . $base64 . '" alt=image.jpg/>');
+  return ('<img align="middle" src="data:image/jpeg;base64,' . $base64 . '" alt=image.jpg/>');
 }
+
+/**
+ * Returns thumbnail file name for given template file name.
+ */
+function getThumbnailNameFromFileName($fileName) {
+  $count = 1;
+  return str_replace('templates/', 'thumb/thumb_', $fileName, $count);
+}
+
+/**
+ * Generate a random string of characters.
+ */
+function generateRandomString($length=32) {
+  $chars = array_merge(range('a', 'z'), range('A', 'Z'), range(0, 9));
+  $keys = array_rand($chars, $length);
+  $result = '';
+  foreach ($keys as $key) {
+    $result .= $char[$key];
+  }
+}
+
+/**
+ * Returns file extension based on its type.
+ */
+function getExtension($fileName) {
+  return new Imagick($fileName).getFormat();
+}
+
+/**
+ * Generate a preview file name.
+ */
+function getFileNameFromTemplate($thumb) {
+  retun 'preview/' . generateRandomString() . getExtension($thumb);
+}
+
+/**
+ * Generate a random meme file name.
+ */
+function getMemeFileNameFromTemplate($fileName) {
+}
+  retun 'meme/' . generateRandomString() . getExtension($thumb);
+
 ?>

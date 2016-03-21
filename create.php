@@ -10,29 +10,31 @@
   document.body.appendChild(content.querySelector('.header').cloneNode(true));
 </script>
 <script>
-  function submitForm(choice) {
-    var form = document.getElementById('thumbChoiceForm');
-    if (form == null) {
-      form = document.createElement('form');
-      form.id = 'thumbChoiceForm';
-    }
-    document.body.appendChild(form);
-    form.method = 'POST';
-    form.action = 'create.php';
-    var inputChoice = document.getElementById('thumbChoiceInput');
-    if (inputChoice == null) {
-      inputChoice = document.createElement('input');
-      inputChoice.id = 'thumbChoiceInput';
-      form.appendChild(inputChoice);
-    }
-    inputChoice.name = 'thumbChoice';
-    inputChoice.type = 'hidden';
-    inputChoice.value = choice;
-    form.submit();
+
+function submitForm(choice) {
+  var form = document.getElementById('thumbChoiceForm');
+  if (form == null) {
+    form = document.createElement('form');
+    form.id = 'thumbChoiceForm';
   }
+  document.body.appendChild(form);
+  form.method = 'POST';
+  form.action = 'create.php';
+  var inputChoice = document.getElementById('thumbChoiceInput');
+  if (inputChoice == null) {
+    inputChoice = document.createElement('input');
+    inputChoice.id = 'thumbChoiceInput';
+    inputChoice.name = 'thumbChoice';
+    form.appendChild(inputChoice);
+  }
+  inputChoice.type = 'hidden';
+  inputChoice.value = choice;
+  form.submit();
+}
+
 </script>
 <?php
-include 'util.php';
+include_once 'util.php';
 include_once 'ChromePhp.php';
 /**
  * Returns exact location for the text. Currently returns (x. y, fontsize). In future
@@ -81,23 +83,6 @@ function createMeme($templateFileName, $text) {
 }
 
 /**
- * Returns thumbnail file name for given template file name.
- */
-function getThumbnailNameFromFileName($fileName) {
-  $count = 1;
-  return str_replace('templates/', 'thumb/thumb_', $fileName, $count);
-}
-
-/**
- * Returns template file name for the given thumbnail
- * file name.
- */
-function getFileNameFromThumbnailName($thumb) {
-  $count = 1;
-  return str_replace('thumb/thumb_', 'templates/', $fileName, $count);
-}
-
-/**
  * Creates thumbnails for all the available meme templates.
  */
 function createTemplateThumbnails() {
@@ -143,9 +128,31 @@ function displayThumbnails() {
   echo $imageTable;
 }
 
+function getMemeText($memeTemplate) {
+  echo '<form action="create.php" id="thumbChoiceForm" method="post">'.
+    '<table width=320>' . ' <tr><td>' .
+    '<p align="center">Enter the text for your meme.</p>' .
+    '</td></tr>' .
+    '<tr><td>' .
+    '<center>' . renderImage($memeTemplate) . '</center>' .
+    '</td></tr> <tr/><tr/>'.
+    '<tr>' .
+    '<td><input type="text" size=64 maxlength=128 id="memeTextInput">' .
+    '</td> </tr>' .
+    '<tr><td><input type="submit" name="intent" id="preview" value="Preview">' .
+    '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.
+    '<input type="submit" name="intent" id="submit" value="Submit"></td></tr>' .
+    '</table>'.
+    '<input type="hidden" name="thumbChoice" id="thumbChoiceInput" value="' .
+    $memeTemplate . '">' .
+    '</form>';
+}
+
 if (isset($_POST['thumbChoice'])) {
-  echo '<h1>FOUND</h1>';
-  echo '<h1>' . $_POST['thumbChoice'] . '</h1>';
+  $thumbnailName = $_POST['thumbChoice'];
+  $memeTemplate = getFileNameFromThumbnailName($thumbnailName);
+  echo '<h1>' . $memeTemplate . '</h1>';
+  getMemeText($memeTemplate);
 } else {
   echo '<h1>NOT SET</h1>';
   createTemplateThumbnails();
