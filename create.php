@@ -36,6 +36,7 @@ function submitForm(choice) {
 <?php
 include_once 'util.php';
 include_once 'ChromePhp.php';
+
 /**
  * Returns exact location for the text. Currently returns (x. y, fontsize). In future
  * it should be extended to include location as well as text wrapping.
@@ -128,13 +129,19 @@ function displayThumbnails() {
   echo $imageTable;
 }
 
-function getMemeText($memeTemplate) {
+/**
+ * Displays an image and presents a form to enter meme test.
+ * @param renderFile File to render. When showing a preview, this
+ * will be the preview file. For a new meme, this will be the template file.
+ * @param memeTemplate Name of the meme template.
+ */
+function displayMemeTextForm($renderFile, $memeTemplate) {
   echo '<form action="create.php" id="thumbChoiceForm" method="post">'.
     '<table width=320>' . ' <tr><td>' .
     '<p align="center">Enter the text for your meme.</p>' .
     '</td></tr>' .
     '<tr><td>' .
-    '<center>' . renderImage($memeTemplate) . '</center>' .
+    '<center>' . renderImage($renderFile) . '</center>' .
     '</td></tr> <tr/><tr/>'.
     '<tr>' .
     '<td><input type="text" size=64 maxlength=128 id="memeTextInput">' .
@@ -148,11 +155,41 @@ function getMemeText($memeTemplate) {
     '</form>';
 }
 
+/**
+ * Generates a meme preview and renders it. But does not commit
+ * it in database, allowing user to change it.
+ */
+function previewMeme($memeTemplate, $memeText) {
+  $preview = createMeme($memeTemplate, $memeText);
+  $previewFile = getPreviewFileNameFromTemplate($memeTemplate0);
+  $preview->writeImage($previewFile);
+  displayMemeTextForm($previewFile, $memeTemplate);
+}
+
+/**
+ * Achievement unlocked! 
+ * Creates a meme and commits it in the database.
+ */
+function submitMeme($memeTemplate, $memeText) {
+  $meme = createMeme($memeTemplate, $memeText);
+  $previewFile = getMemeFileNameFromTemplate($memeTemplate0);
+  $meme->writeImage($previewFile);
+}
+
 if (isset($_POST['thumbChoice'])) {
   $thumbnailName = $_POST['thumbChoice'];
   $memeTemplate = getFileNameFromThumbnailName($thumbnailName);
-  echo '<h1>' . $memeTemplate . '</h1>';
-  getMemeText($memeTemplate);
+  if (isset($_POST['intent'])) {
+    if ($_POST['intent'] == 'Submit') {
+      echo '<h1>SUbmit</h1>';
+      submitMeme($memeTemplate, $memeText);
+    } else if ($_POST['intent'] == 'Preview') {
+      echo '<h1>Preview</h1>';
+      previewMeme($memeTemplate, $memeText);
+    }
+  } else {
+    displayMemeTextForm($memeTemplate);
+  }
 } else {
   echo '<h1>NOT SET</h1>';
   createTemplateThumbnails();

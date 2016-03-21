@@ -16,6 +16,14 @@ function getThumbnailNameFromFileName($fileName) {
 }
 
 /**
+ * Returns thumbnail file name for given template file name.
+ */
+function getFileNameFromThumbnailName($fileName) {
+  $count = 1;
+  return str_replace('thumb/thumb_', 'templates/', $fileName, $count);
+}
+
+/**
  * Generate a random string of characters.
  */
 function generateRandomString($length=32) {
@@ -23,7 +31,7 @@ function generateRandomString($length=32) {
   $keys = array_rand($chars, $length);
   $result = '';
   foreach ($keys as $key) {
-    $result .= $char[$key];
+    $result .= $chars[$key];
   }
 }
 
@@ -31,15 +39,15 @@ function generateRandomString($length=32) {
  * Returns file extension based on its type.
  */
 function getExtension($fileName) {
-  ChromePhp::log('Extension for ' . $fileName . ' is ' . new Imagick($fileName).getFormat());
-  return new Imagick($fileName).getFormat();
+  ChromePhp::log('Extension for ' . $fileName . ' is ' . (new Imagick($fileName))->getFormat());
+  return (new Imagick($fileName))->getFormat();
 }
 
 /**
  * Generate a preview file name.
  */
-function getFileNameFromTemplate($thumb) {
-  retun 'preview/' . generateRandomString() . getExtension($thumb);
+function getPreviewFileNameFromTemplate($thumb) {
+  return 'preview/' . generateRandomString() . getExtension($thumb);
 }
 
 /**
@@ -47,6 +55,6 @@ function getFileNameFromTemplate($thumb) {
  */
 function getMemeFileNameFromTemplate($fileName) {
 }
-  retun 'meme/' . generateRandomString() . getExtension($thumb);
+  return 'meme/' . generateRandomString() . getExtension($thumb);
 
 ?>
