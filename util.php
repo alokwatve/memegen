@@ -1,4 +1,6 @@
 <?php
+include_once 'ChromePhp.php';
+
 function renderImage($filename) {
   $contents = file_get_contents($filename);
   $base64   = base64_encode($contents); 
@@ -29,6 +31,7 @@ function generateRandomString($length=32) {
  * Returns file extension based on its type.
  */
 function getExtension($fileName) {
+  ChromePhp::log('Extension for ' . $fileName . ' is ' . new Imagick($fileName).getFormat());
   return new Imagick($fileName).getFormat();
 }
 
