@@ -1,0 +1,3 @@
+<Files ~ "\.(php|html|gif|jpe?g|png)$">
+  Require all granted
+</Files>
