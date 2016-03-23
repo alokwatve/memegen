@@ -160,7 +160,7 @@ function displayMemeTextForm($renderFile, $memeTemplate) {
  * it in database, allowing user to change it.
  */
 function previewMeme($memeTemplate, $memeText) {
-  CreatePhp::log("Template ", $memeTemplate);
+  ChromePhp::log("Template ", $memeTemplate);
   $preview = createMeme($memeTemplate, $memeText);
   $previewFile = getPreviewFileNameFromTemplate($memeTemplate0);
   $preview->writeImage($previewFile);
