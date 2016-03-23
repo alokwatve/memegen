@@ -33,14 +33,19 @@ function generateRandomString($length=32) {
   foreach ($keys as $key) {
     $result .= $chars[$key];
   }
+  return $result;
 }
 
 /**
  * Returns file extension based on its type.
  */
 function getExtension($fileName) {
-  ChromePhp::log('Extension for ' . $fileName . ' is ' . (new Imagick($fileName))->getFormat());
-  return (new Imagick($fileName))->getFormat();
+  $parts = explode(".", $fileName);
+  if (count($parts) > 1) {
+    return end($parts);
+  } else {
+    return "jpg";
+  }
 }
 
 /**
@@ -54,7 +59,7 @@ function getPreviewFileNameFromTemplate($fileName) {
  * Generate a random meme file name.
  */
 function getMemeFileNameFromTemplate($fileName) {
-}
   return 'meme/' . generateRandomString() . getExtension($fileName);
+}
 
 ?>

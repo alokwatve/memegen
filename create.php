@@ -48,7 +48,13 @@ function getTextLocation($imageHeight, $imageWidth, $text) {
   $locationY = $imageHeight - $fontsize * 0.5;
   $textLen = strlen($text);
   error_log(sprintf("TEXT %d\n", $textLen));
-  $textWidth = $textLen * $fontsize * 0.7;
+  $textWidth = $textLen * $fontsize * 0.65;
+
+  if ($textWidth > $imageWidth) {
+    $textWidth = $imageWidth;
+    $fontsize = ($textWidth / 0.65) / $textLen;
+    $locationY = $imageHeight - $fontsize * 0.5;
+  }
   $locationX = ($imageWidth - $textWidth) *0.5;
   return [$locationX, $locationY, $fontsize];
 }
@@ -59,6 +65,7 @@ function getTextLocation($imageHeight, $imageWidth, $text) {
  * the image.
  */
 function createMeme($templateFileName, $text) {
+  ChromePhp::log("Template in cretememe  ", $templateFileName); 
   $image = new Imagick($templateFileName);
   $draw = new ImagickDraw();
   $color = new ImagickPixel('#ffffff');
@@ -144,7 +151,7 @@ function displayMemeTextForm($renderFile, $memeTemplate) {
     '<center>' . renderImage($renderFile) . '</center>' .
     '</td></tr> <tr/><tr/>'.
     '<tr>' .
-    '<td><input type="text" size=64 maxlength=128 id="memeTextInput">' .
+    '<td><input type="text" size=64 maxlength=128 name="memeTextInput">' .
     '</td> </tr>' .
     '<tr><td><input type="submit" name="intent" id="preview" value="Preview">' .
     '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.
@@ -160,9 +167,10 @@ function displayMemeTextForm($renderFile, $memeTemplate) {
  * it in database, allowing user to change it.
  */
 function previewMeme($memeTemplate, $memeText) {
-  ChromePhp::log("Template ", $memeTemplate);
+  ChromePhp::log("Template ", $memeText);
   $preview = createMeme($memeTemplate, $memeText);
-  $previewFile = getPreviewFileNameFromTemplate($memeTemplate0);
+  $previewFile = getPreviewFileNameFromTemplate($memeTemplate);
+  ChromePhp::log("Preview file ", $previewFile);
   $preview->writeImage($previewFile);
   displayMemeTextForm($previewFile, $memeTemplate);
 }
@@ -172,14 +180,19 @@ function previewMeme($memeTemplate, $memeText) {
  * Creates a meme and commits it in the database.
  */
 function submitMeme($memeTemplate, $memeText) {
+  ChromePhp::log("Template ", $memeText);
   $meme = createMeme($memeTemplate, $memeText);
-  $previewFile = getMemeFileNameFromTemplate($memeTemplate0);
+  $previewFile = getMemeFileNameFromTemplate($memeTemplate);
+  ChromePhp::log("Preview file ", $previewFile);
   $meme->writeImage($previewFile);
+  displayMemeTextForm($previewFile, $memeTemplate);
 }
 
 if (isset($_POST['thumbChoice'])) {
   $thumbnailName = $_POST['thumbChoice'];
   $memeTemplate = getFileNameFromThumbnailName($thumbnailName);
+  $memeText = $_POST['memeTextInput'];
+  ChromePhp::log("Meme text ", $memeText);
   if (isset($_POST['intent'])) {
     if ($_POST['intent'] == 'Submit') {
       echo '<h1>SUbmit</h1>';
@@ -189,7 +202,7 @@ if (isset($_POST['thumbChoice'])) {
       previewMeme($memeTemplate, $memeText);
     }
   } else {
-    displayMemeTextForm($memeTemplate);
+    displayMemeTextForm($memeTemplate, $memeTemplate);
   }
 } else {
   echo '<h1>NOT SET</h1>';
