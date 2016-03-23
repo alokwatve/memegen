@@ -46,8 +46,8 @@ function getExtension($fileName) {
 /**
  * Generate a preview file name.
  */
-function getPreviewFileNameFromTemplate($thumb) {
-  return 'preview/' . generateRandomString() . getExtension($thumb);
+function getPreviewFileNameFromTemplate($fileName) {
+  return 'preview/' . generateRandomString() . getExtension($fileName);
 }
 
 /**
@@ -55,6 +55,6 @@ function getPreviewFileNameFromTemplate($thumb) {
  */
 function getMemeFileNameFromTemplate($fileName) {
 }
-  return 'meme/' . generateRandomString() . getExtension($thumb);
+  return 'meme/' . generateRandomString() . getExtension($fileName);
 
 ?>
