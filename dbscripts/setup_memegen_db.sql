@@ -16,11 +16,12 @@ create table if not exists TemplateTags (
 create table if not exists MemeInfo (
     meme_id bigint auto_increment,
     filename varchar(256) unique,
-    upvotes bigint,
-    downvotes bigint,
+    upvotes bigint DEFAULT 0,
+    downvotes bigint DEFAULT 0,
     createdby varchar(256),
-    createdon datetime,
-    template_id bigint,
+    createdon datetimei DEFAULT CURRENT_TIMESTAMP,
+    templatename varchar(256),
+--    template_id bigint,
 --    foreign key (template_id) references MemeTemplates(template_id) on delete cascade on update cascade,
     primary key (meme_id)
 );

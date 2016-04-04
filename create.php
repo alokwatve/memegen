@@ -36,6 +36,7 @@ function submitForm(choice) {
 <?php
 include_once 'util.php';
 include_once 'ChromePhp.php';
+include_once 'db_params.php';
 
 /**
  * Returns exact location for the text. Currently returns (x. y, fontsize). In future
@@ -137,19 +138,25 @@ function displayThumbnails() {
 }
 
 /**
- * Displays an image and presents a form to enter meme test.
- * @param renderFile File to render. When showing a preview, this
+ * Renders an image in an html table.
+ * @param imageFile File to render. When showing a preview, this
  * will be the preview file. For a new meme, this will be the template file.
+ */
+function renderImageInATable($imageFile) {
+  echo '<table width=320>' . ' <tr><td>' .
+    '<center>' . renderImage($imageFile) . '</center>' .
+    '</td></tr> </table>';
+}
+
+/**
+ * Displays an image and presents a form to enter meme test.
  * @param memeTemplate Name of the meme template.
  */
-function displayMemeTextForm($renderFile, $memeTemplate) {
+function renderMemeTextForm($memeTemplate) {
   echo '<form action="create.php" id="thumbChoiceForm" method="post">'.
     '<table width=320>' . ' <tr><td>' .
     '<p align="center">Enter the text for your meme.</p>' .
     '</td></tr>' .
-    '<tr><td>' .
-    '<center>' . renderImage($renderFile) . '</center>' .
-    '</td></tr> <tr/><tr/>'.
     '<tr>' .
     '<td><input type="text" size=64 maxlength=128 name="memeTextInput">' .
     '</td> </tr>' .
@@ -172,7 +179,14 @@ function previewMeme($memeTemplate, $memeText) {
   $previewFile = getPreviewFileNameFromTemplate($memeTemplate);
   ChromePhp::log("Preview file ", $previewFile);
   $preview->writeImage($previewFile);
-  displayMemeTextForm($previewFile, $memeTemplate);
+  renderImageInATable($previewFile);
+  renderMemeTextForm($memeTemplate);
+}
+
+/**
+ * Function that stores information about a meme in the database.
+ */
+function storeMemeInDB($memeFile, $memeTemplate) {
 }
 
 /**
@@ -182,10 +196,11 @@ function previewMeme($memeTemplate, $memeText) {
 function submitMeme($memeTemplate, $memeText) {
   ChromePhp::log("Template ", $memeText);
   $meme = createMeme($memeTemplate, $memeText);
-  $previewFile = getMemeFileNameFromTemplate($memeTemplate);
-  ChromePhp::log("Preview file ", $previewFile);
-  $meme->writeImage($previewFile);
-  displayMemeTextForm($previewFile, $memeTemplate);
+  $memeFile = getMemeFileNameFromTemplate($memeTemplate);
+  ChromePhp::log("Meme file ", $memeFile);
+  $meme->writeImage($memeFile);
+  storeMemeInDB($memeFile, $memeTemplate);
+  renderImageInATable($memeFile);
 }
 
 if (isset($_POST['thumbChoice'])) {
@@ -195,17 +210,15 @@ if (isset($_POST['thumbChoice'])) {
   ChromePhp::log("Meme text ", $memeText);
   if (isset($_POST['intent'])) {
     if ($_POST['intent'] == 'Submit') {
-      echo '<h1>SUbmit</h1>';
       submitMeme($memeTemplate, $memeText);
     } else if ($_POST['intent'] == 'Preview') {
-      echo '<h1>Preview</h1>';
       previewMeme($memeTemplate, $memeText);
     }
   } else {
-    displayMemeTextForm($memeTemplate, $memeTemplate);
+    renderImageInATable($memeTemplate);
+    renderMemeTextForm($memeTemplate);
   }
 } else {
-  echo '<h1>NOT SET</h1>';
   createTemplateThumbnails();
   displayThumbnails();
 }

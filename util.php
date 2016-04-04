@@ -42,7 +42,7 @@ function generateRandomString($length=32) {
 function getExtension($fileName) {
   $parts = explode(".", $fileName);
   if (count($parts) > 1) {
-    return end($parts);
+    return "." . end($parts);
   } else {
     return "jpg";
   }
@@ -59,7 +59,7 @@ function getPreviewFileNameFromTemplate($fileName) {
  * Generate a random meme file name.
  */
 function getMemeFileNameFromTemplate($fileName) {
-  return 'meme/' . generateRandomString() . getExtension($fileName);
+  return 'memes/' . generateRandomString() . getExtension($fileName);
 }
 
 ?>
