@@ -1,7 +1,7 @@
 <html>
 <head>
 <title>Memegen!</title>
-<script src="jquery.js"></script> 
+<!-- script src="jquery.js"></script --> 
 
 <link rel="import" id="header" href="header.html">
 
@@ -15,7 +15,7 @@
 </script>
 <?php
 include 'util.php';
-echo renderImage('templates/clinton_zero.jpg');
+echo renderImage('templates/brace-yourself1.jpg');
 ?>
 </body>
 </html>

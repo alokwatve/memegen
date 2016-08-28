@@ -19,7 +19,7 @@ create table if not exists MemeInfo (
     upvotes bigint DEFAULT 0,
     downvotes bigint DEFAULT 0,
     createdby varchar(256),
-    createdon datetimei DEFAULT CURRENT_TIMESTAMP,
+    createdon datetime ,
     templatename varchar(256),
 --    template_id bigint,
 --    foreign key (template_id) references MemeTemplates(template_id) on delete cascade on update cascade,

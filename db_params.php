@@ -1,5 +1,5 @@
 <?php
-
+// phpinfo();
 // This file defines the database parameters.
 $DBHOST = 'localhost';
 $DBNAME = 'memegendb';
@@ -13,9 +13,8 @@ $TEMPLATETAGS = 'TemplateTags';
 
 $INSERT_MEMEINFO_QUERY = 'INSERT INTO MemeInfo (filename, templatename) VALUES (%s, %s) ';
 
-$memeDbConn = mysql_connect($DBHOST, $DBUSER, $DBPASSWD)
-    or die('Could not connect: ' . mysql_error());
-mysql_select_db($DBNAME) or die('Could not select database');
+$memedb = new PDO('mysql:host=' . $DBHOST . ';dbname=' .
+    $DBNAME, $DBUSER, $DBPASSWD);
 
 ?>
 
