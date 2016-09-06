@@ -175,13 +175,14 @@ function renderImageInATable($imageFile) {
  * Displays an image and presents a form to enter meme test.
  * @param memeTemplate Name of the meme template.
  */
-function renderMemeTextForm($memeTemplate) {
+function renderMemeTextForm($memeTemplate, $defaultText = "") {
   echo '<form action="create.php" id="thumbChoiceForm" method="post">'.
     '<table width=320>' . ' <tr><td>' .
     '<p align="center">Enter the text for your meme.</p>' .
     '</td></tr>' .
     '<tr>' .
-    '<td><input type="text" size=64 maxlength=128 name="memeTextInput">' .
+    '<td><input type="text" size=64 maxlength=128 name="memeTextInput" ' .
+    'value="' . $defaultText . '" >' .
     '</td> </tr>' .
     '<tr><td><input type="submit" name="intent" id="preview" value="Preview">' .
     '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.
@@ -196,14 +197,14 @@ function renderMemeTextForm($memeTemplate) {
  * Generates a meme preview and renders it. But does not commit
  * it in database, allowing user to change it.
  */
-function previewMeme($memeTemplate, $memeText) {
+function previewMeme($memeTemplate, $memeText = "") {
   ChromePhp::log("Template ", $memeText);
   $preview = createMeme($memeTemplate, $memeText);
   $previewFile = getPreviewFileNameFromTemplate($memeTemplate);
   ChromePhp::log("Preview file ", $previewFile);
   $preview->writeImage($previewFile);
   renderImageInATable($previewFile);
-  renderMemeTextForm($memeTemplate);
+  renderMemeTextForm($memeTemplate, $memeText);
 }
 
 /**
@@ -224,13 +225,13 @@ function submitMeme($memeTemplate, $memeText) {
   $meme->writeImage($memeFile);
   storeMemeInDB($memeFile, $memeTemplate);
   renderImageInATable($memeFile);
-  renderMemeTextForm($memeTemplate);
+  renderMemeTextForm($memeTemplate, $memeText);
 }
 
 if (isset($_POST['thumbChoice'])) {
   $thumbnailName = $_POST['thumbChoice'];
   $memeTemplate = getFileNameFromThumbnailName($thumbnailName);
-  $memeText = $_POST['memeTextInput'];
+  $memeText = array_key_exists("memeTextInput", $_POST) ? $_POST['memeTextInput'] : "" ;
   ChromePhp::log("Meme text ", $memeText);
   if (isset($_POST['intent'])) {
     if ($_POST['intent'] == 'Submit') {
