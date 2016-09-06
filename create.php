@@ -6,7 +6,7 @@
 <body>
 <script>
   var getImport = document.getElementById('header');
-  var content = document.querySelector('link[id="header"]').import;    
+  var content = document.querySelector('link[id="header"]').import;
   document.body.appendChild(content.querySelector('.header').cloneNode(true));
 </script>
 <script>
@@ -38,26 +38,39 @@ include_once 'util.php';
 include_once 'ChromePhp.php';
 include_once 'db_params.php';
 
-/**
- * Returns exact location for the text. Currently returns (x. y, fontsize). In future
- * it should be extended to include location as well as text wrapping.
- * This function implictily assumes a monospaced font.
- */
-function getTextLocation($imageHeight, $imageWidth, $text) {
-  $fontsize = $imageHeight / 4;
-  // This is just a heuristic.
-  $locationY = $imageHeight - $fontsize * 0.5;
-  $textLen = strlen($text);
-  error_log(sprintf("TEXT %d\n", $textLen));
-  $textWidth = $textLen * $fontsize * 0.65;
+define("MIN_FONT_SIZE", 20);
+define("MAX_TEXT_WIDTH_COEFF", 0.9);
+define("MIN_RELEATIVE_FONT_SIZE_COEFF", 0.1);
 
-  if ($textWidth > $imageWidth) {
-    $textWidth = $imageWidth;
-    $fontsize = ($textWidth / 0.65) / $textLen;
-    $locationY = $imageHeight - $fontsize * 0.5;
+/**
+ * Function to arrange text into multiple lines such that each line
+ * is less that the maxwidth. It readjusts the font with some heuristics
+ *
+ * @return An array containing list of lines and the new fontsize.
+ */
+function wordWrapAnnotation($image, $draw, $text, $maxWidth) {
+  $text = trim($text);
+  $words = preg_split('%\s%', $text, -1, PREG_SPLIT_NO_EMPTY);
+  $lines = array();
+  $fontsize = $draw->getFontSize();
+  if (count($words) == 0) {
+    return array($lines, $fontsize);
   }
-  $locationX = ($imageWidth - $textWidth) *0.5;
-  return [$locationX, $locationY, $fontsize];
+  $nextLine = $words[0];
+  for ($i = 1; $i < count($words); ++$i) {
+    $candidate = $nextLine . " " . $words[$i];
+    $metrics = $image->queryFontMetrics($draw, $candidate);
+    if ($metrics['textWidth'] > $maxWidth) {
+      // Flush next line...
+      $lines[] = $nextLine;
+      $nextLine = $words[$i];
+      $fontsize = 0.6 * $fontsize;
+    } else {
+      $nextLine .= " " . $words[$i];
+    }
+  }
+  $lines[] = $nextLine;
+  return array($lines, $fontsize);
 }
 
 /**
@@ -66,15 +79,16 @@ function getTextLocation($imageHeight, $imageWidth, $text) {
  * the image.
  */
 function createMeme($templateFileName, $text) {
-  ChromePhp::log("Template in cretememe  ", $templateFileName); 
+  ChromePhp::log("Template in cretememe  ", $templateFileName);
   $image = new Imagick($templateFileName);
   $draw = new ImagickDraw();
   $color = new ImagickPixel('#ffffff');
+  $draw->setTextAlignment (Imagick::ALIGN_CENTER);
 
   $height = $image->getImageHeight();
   $width = $image->getImageWidth();
-  list($locationX, $locationY, $fontsize) = getTextLocation($height, $width, $text);
-
+  $fontsize = max(MIN_FONT_SIZE, $height * MIN_RELEATIVE_FONT_SIZE_COEFF);
+  error_log(sprintf("FONT SIZE %d", $fontsize));
   /* Font properties */
   $draw->setFont('fonts/FreeMonoBold.ttf');
   $draw->setFontSize($fontsize);
@@ -82,10 +96,19 @@ function createMeme($templateFileName, $text) {
   $draw->setStrokeAntialias(true);
   $draw->setTextAntialias(true);
 
-  /* Create text */
-  $draw->annotation($locationX, $locationY, $text);
+  $maxWidth = $width;
+  error_log(sprintf("FONT SIZE1 %d", $fontsize));
+  list($lines, $fontsize) = wordWrapAnnotation($image, $draw, $text, $maxWidth);
+  error_log(sprintf("FONT SIZE2 %d", $fontsize));
+  $mergedText = implode("\n", $lines);
+  $metrics = $image->queryFontMetrics($draw, $mergedText);
+  $locationX = 0.5 * $width;
+  $locationY = $height - $metrics['textHeight'];
+  $image->annotateImage($draw, $locationX, $locationY, 0, $mergedText);
+  error_log(sprintf(" %d  %d  %d  %d      %d\n", $height, $width, $locationX, $locationY,  $fontsize));
 
-  error_log(sprintf(" %d  %d  %d   %d %d\n", $height, $width, $locationX, $locationY, $fontsize));
+  //$fontsize = max(MIN_FONT_SIZE, $fontsize);
+  $draw->setFontSize($fontsize);
   /* Create image */
   $image->drawImage($draw);
   return $image;
@@ -122,7 +145,7 @@ function displayThumbnails() {
       if ($i == 0) {
         $imageTable .= '<tr>';
       }
-      $imageTable .= '<td align="center">' . 
+      $imageTable .= '<td align="center">' .
         '<img src="' . $thumbnailName . '" onClick="submitForm(\'' . $thumbnailName  . '\')"></td> ';// . $thumbnailName ')" > </td>';
       if ($i == 3) {
         $imageTable .= '</tr>';
@@ -190,7 +213,7 @@ function storeMemeInDB($memeFile, $memeTemplate) {
 }
 
 /**
- * Achievement unlocked! 
+ * Achievement unlocked!
  * Creates a meme and commits it in the database.
  */
 function submitMeme($memeTemplate, $memeText) {
@@ -201,6 +224,7 @@ function submitMeme($memeTemplate, $memeText) {
   $meme->writeImage($memeFile);
   storeMemeInDB($memeFile, $memeTemplate);
   renderImageInATable($memeFile);
+  renderMemeTextForm($memeTemplate);
 }
 
 if (isset($_POST['thumbChoice'])) {
